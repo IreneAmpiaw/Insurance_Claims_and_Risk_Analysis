@@ -1,5 +1,7 @@
 ## Insurance Claims & Risk Analysis
 
+<img width="626" height="358" alt="Screenshot 2026-10-22 082008" src="https://github.com/user-attachments/assets/a657464b-b2ef-4437-a0cc-0a14b888fd36" />
+
 Tools: Python · Pandas · SQL · Google BigQuery · Power BI · DAX
 
 Project Overview
@@ -229,4 +231,4 @@ The longer-term objective is to build on these findings to develop a transparent
 
 Project type: Data Analytics / Business Intelligence
 
-Author: Data Analyst
+Author: Irene Ampiaw
