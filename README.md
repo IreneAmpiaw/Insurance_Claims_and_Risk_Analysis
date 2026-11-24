@@ -1,234 +1,401 @@
-## Insurance Claims & Risk Analysis
+## Insurance Claims and Risk Analysis
 
-<img width="626" height="358" alt="Screenshot 2026-10-22 082008" src="https://github.com/user-attachments/assets/a657464b-b2ef-4437-a0cc-0a14b888fd36" />
+## Project Overview
+This project focuses on analysing insurance claims and employee data to understand historical claims behaviour, employee utilisation patterns and the financial exposure associated with approved insurance claims.
 
-Tools: Python · Pandas · SQL · Google BigQuery · Power BI · DAX
+The project addresses a business challenge faced by insurance management: understanding rising claims costs, identifying patterns in claims utilisation, monitoring financial exposure and supporting better decision-making through data.
 
-Project Overview
+Using SQL in Google BigQuery and Power BI, I transformed multiple insurance datasets into analytical tables, investigated claims patterns and developed a weighted historical claims exposure scoring framework.
 
-How can an insurance provider use claims and premium data to better understand financial exposure, identify patterns in healthcare utilization, and make more informed business decisions?
+The final deliverable includes interactive dashboards designed to provide management with insights into claims performance, employee utilisation, regional performance and historical financial exposure.
 
-This project explores that question using healthcare insurance data covering employees of corporate organizations.
+> **Important:** The exposure score is an exploratory, historical claims classification framework. It is not a clinically validated health-risk model, an actuarial underwriting score or a prediction of future claims.
 
-The goal is to analyze claims, examine potential risk factors, compare approved claim costs with recorded premium payments, and develop an interactive Power BI dashboard that makes the findings easier to understand.
+---
 
-The project follows an end-to-end analytics workflow, from data cleaning and database exploration to SQL analysis, data visualization, and business recommendations.
+## Business Problem
 
-Business Problem
+Insurance management needs better visibility into claims behaviour and financial exposure across its covered employee population.
 
-Insurance providers need to understand not only how much they pay in claims, but also which factors contribute to claim costs, how healthcare utilization varies across employees, and whether recorded premium payments appear sufficient relative to recorded claims.
+Key concerns include:
 
-This analysis investigates several questions:
+- Increasing insurance claims expenditure.
+- Differences in claims utilisation among employees.
+- Identifying employees and groups associated with higher historical claims costs.
+- Understanding claims approval, pending and rejection patterns.
+- Monitoring regional and company-level claims performance.
+- Supporting evidence-based decisions through reliable reporting.
 
-- How does claim frequency and cost vary across employee age groups?
-- Do employees with frequent claims have higher claim costs per employee?
-- How do approved claim amounts compare with recorded paid premiums across companies?
-- Which companies account for the largest share of approved claim costs?
-- What patterns in claims data could support future risk assessment and financial planning?
+The objective was to use historical insurance data to uncover meaningful patterns and develop an analytical reporting solution that could support these decisions.
 
-Project Objectives
+---
 
-1. Prepare and validate insurance datasets for analysis.
-2. Explore the database structure and relationships between tables.
-3. Use SQL to investigate insurance risk assumptions and business questions.
-4. Build reusable measures and interactive visuals in Power BI.
-5. Communicate findings, limitations, and potential business implications.
-6. Establish a foundation for a future custom insurance Risk Score model.
+## Project Objectives
 
-Tools and Technologies
+1. Analyse historical insurance claims and employee information.
+2. Investigate claims frequency, approval rates and financial exposure.
+3. Identify patterns across employee demographics and employment characteristics.
+4. Examine claims utilisation across companies and regions.
+5. Develop a historical claims exposure classification framework.
+6. Build interactive Power BI dashboards for management reporting.
 
-| Tool | Purpose |
+---
+
+## Dataset Overview
+
+The project used multiple relational datasets stored in Google BigQuery.
+
+Key datasets included:
+
+- Claims
+- Covered Employees
+- Companies
+- Branches
+- Insurance
+- Beneficiaries
+- Claim Workflow
+- Premium Payments
+
+### Dataset Summary
+
+| Metric | Value |
+|---|---:|
+| Covered employees | 1,974 |
+| Total recorded claims | 2,500 |
+| Approved claims | 1,736 |
+| Pending claims | 508 |
+| Rejected claims | 256 |
+| Total approved claim amount | GHS 47,248,039 |
+
+The claims records cover January 2024 to December 2025, while recorded premium payments cover February 2024 to June 2026.
+
+**Data limitation:** The claims and premium records cover different periods. Therefore, comparisons between approved claims and recorded premiums should be interpreted as historical comparisons, not as a definitive insurance loss ratio or profitability measure.
+
+---
+
+## Tools and Technologies
+
+| Tool | Application |
 |---|---|
-| Python | Data preparation and cleaning |
-| Pandas | Data manipulation and validation |
-| SQL | Data exploration, joins, aggregations, and risk analysis |
-| Google BigQuery | Cloud data storage and SQL analysis |
-| Power BI Desktop | Interactive dashboard development |
-| DAX | Measures and calculations for dashboard KPIs |
-| GitHub | Project documentation and portfolio presentation |
+| Google BigQuery | Data storage, transformation and SQL analysis |
+| SQL | Data exploration, joins, aggregations, analytical queries and table creation |
+| Power BI | Interactive dashboards, KPI reporting and data visualisation |
+| Excel | Initial dataset review and preparation |
+| Python / Pandas | Dataset cleaning and preparation |
 
-Dataset and Database Structure
+---
 
-The project uses eight related tables:
+## Data Preparation and Transformation
 
-- `beneficiaries`
-- `claim_workflow`
-- `claims`
-- `companies`
-- `covered_employees`
-- `insurance`
-- `branch`
-- `premium_payments`
-
-The tables contain information related to employees, companies, branches, insurance claims, beneficiaries, and premium payments.
-
-The database relationships were explored and documented using an entity relationship diagram (ERD). The data was loaded into Google BigQuery for SQL-based analysis.
-
-- Data Preparation
-
-Python and Pandas were used to prepare the datasets for analysis.
+The project involved working with multiple insurance datasets and preparing them for analysis.
 
 Key activities included:
 
-- Reviewing the structure and quality of the source files.
-- Cleaning data and addressing inconsistencies.
-- Investigating name and gender inconsistencies.
-- Creating validation flags, including gender mismatch indicators.
-- Reviewing table relationships and preparing the data for loading into BigQuery.
+- Reviewing source tables and understanding their structures.
+- Cleaning and preparing datasets for analysis.
+- Examining relationships between claims, covered employees, companies and branches.
+- Using SQL joins to combine relevant datasets.
+- Aggregating claims information at employee level.
+- Creating reusable analytical tables in BigQuery.
+- Validating record counts, unique employee IDs and financial totals.
 
-- Data quality checks were important because inconsistencies can affect the reliability of downstream analysis.
+### Analytical Tables Created
 
-- Analytical Approach
+**1. employee_risk_analysis**
 
-SQL was used to explore the data, calculate key metrics, and investigate business assumptions.
+An employee-level analytical table containing employee characteristics and aggregated claims information, including:
 
-1. Age and Healthcare Utilization
-
-Business question: Do older employees require more medical attention?
-
-Employees were grouped into age bands and compared using claim counts, claims per employee, claim amounts, and approval rates.
-
-Finding: Claims per employee increased slightly across the analyzed age groups, from approximately 1.43 among employees aged 18–29 to 1.48 among employees aged 40–49 and 50–59.
-
-The results suggest differences in healthcare utilization across age groups, but they do not establish that age alone causes higher medical costs.
-
-2. Frequent Claimants and Financial Exposure
-
-Business question: Do employees with frequent claims represent higher insurance exposure?
-
-Employees were grouped according to their number of claims:
-
-- Low utilization: 1–2 claims
-- Moderate utilization: 3–4 claims
-- High utilization: 5–6 claims
-
-The analysis compared employee counts, claim frequency, total claim costs, average claim amounts, and claim cost per employee.
-
-Finding: The high-utilization group had the highest claim cost per employee, at approximately GHS 122,963. However, it contained only 13 employees. Its average claim amount was lower than that of the low- and moderate-utilization groups.
-
-This suggests that higher cumulative costs may be associated with repeated claims rather than greater cost per individual claim. The small high-utilization group should be interpreted cautiously.
-
-3. Corporate Claims and Recorded Premium Payments
-
-Business question: How do approved claim costs compare with recorded paid premiums across companies?
-
-Claims and premium payments were aggregated separately before being compared to reduce the risk of double-counting caused by joins across related tables.
-
-The analysis examined:
-
-- Total approved claim amounts by company.
-- Recorded paid premiums by company.
-- Approved claims compared with recorded paid premiums.
-- Claim-to-recorded-premium ratios.
-
-The dataset contained approximately GHS 47.25 million in approved claims and GHS 5.60 million in recorded paid premiums for the respective analysis periods.
-
-Finding: Recorded approved claims exceeded recorded paid premiums for every company analyzed.
-
-This indicates a potential financial exposure that deserves further investigation. However, these ratios are not definitive insurance loss ratios because policy coverage periods, earned premiums, and complete premium obligations were not available for verification.
-
-- Power BI Dashboard
-
-Power BI Desktop was connected to BigQuery, and relationships between the tables were configured to support analysis across the dataset.
-
-The Executive Overview page is being developed to summarize key metrics and claim patterns.
-
-Key Performance Indicators
-
-The dashboard includes or is being developed to include:
-
-- Total claims.
-- Number of approved claims.
+- Total submitted claims.
+- Approved claims.
+- Pending claims.
+- Rejected claims.
 - Total approved claim amount.
-- Average approved claim amount.
-- Claim approval rate.
-- Recorded paid premiums.
-- Total covered employees.
-- Pending and denied claims, where supported by the source status values.
+- Average claim amount.
 
-Visualizations
+**2. employee_risk_scored**
 
-The Executive Overview includes existing charts and a monthly approved-claim trend. Additional dashboard components support analysis of:
+An extended employee-level table containing frequency categories, cost exposure categories, scoring points, historical exposure scores and final classifications.
 
-- Approved claim amounts by company.
-- Claim patterns by claim type.
-- Claim activity over time.
-- Company-level financial exposure and claim costs.
+**3. risk_exposure_summary**
 
-Date filtering is being configured using a dedicated date table to support exploration by year, month, and date range.
+A management-level summary table containing employee counts, exposure classifications, claims statistics and approved claim amounts.
 
-Further dashboard development will focus on employee risk and utilization, corporate financial risk, and claims operations where the available data supports reliable analysis.
+---
 
-Key Findings
+## Exploratory Data Analysis
 
-The analysis has produced several preliminary findings:
+I investigated several factors that could help explain differences in historical claims utilisation and financial exposure.
 
-1. Claim frequency per employee varies modestly across age groups.
-2. Employees with frequent claims can have higher cumulative claim costs per employee.
-3. The small high-utilization group requires careful interpretation because of its limited size.
-4. Recorded approved claim costs exceed recorded paid premiums across the companies analyzed.
-5. Data limitations must be addressed before drawing definitive conclusions about profitability or insurance loss ratios.
+### 1. Age Analysis
 
-These findings can inform further investigation, but they should not be treated as causal conclusions or final underwriting decisions.
+Employees were grouped into age categories:
 
-Data Limitations
+- 18–29
+- 30–39
+- 40–49
+- 50–59
 
-Several limitations affect interpretation:
+The 50–59 age group recorded the highest average approved claim amount per employee, at approximately GHS 25,950.76.
 
-- The available data does not fully establish policy coverage periods or earned premiums.
-- Recorded premium payments may not represent all premium obligations for the corresponding claims period.
-- Approval status does not necessarily indicate that a claim has been paid.
-- The high-utilization employee group is relatively small.
-- Observed differences across demographic groups do not establish causation.
-- Additional validation is needed before using the analysis to make individual-level insurance decisions.
+This indicated differences in historical claims expenditure across age groups.
 
-These limitations are documented to ensure that the findings are interpreted responsibly.
+### 2. Smoking Status Analysis
 
-Project Status and Next Steps
+A comparison of smokers and non-smokers showed that non-smokers had slightly higher average approved claim amounts per employee in this dataset.
 
-This project is being developed iteratively.
+This demonstrated the importance of investigating actual data rather than assuming that a particular characteristic necessarily corresponds to higher claims costs.
 
-Completed work includes data preparation, exploration of the eight-table database, loading data into BigQuery, SQL-based risk analyses, and initial Power BI dashboard development.
+### 3. Gender Analysis
 
-Planned next steps include:
+Historical claims frequency and average approved claim amounts were relatively similar between male and female employees.
 
-- Complete and validate the Executive Overview dashboard.
-- Develop the Employee Risk & Utilization dashboard page.
-- Expand corporate financial risk and claims operations analysis.
-- Develop and validate a transparent custom Risk Score model.
-- Prepare an executive summary with actionable recommendations.
-- Publish the finalized project artifacts and dashboard screenshots on GitHub.
+Gender was therefore excluded from the individual exposure scoring framework.
 
-Skills Demonstrated
+### 4. Occupation Analysis
 
-- Data cleaning and validation using Python and Pandas.
-- Relational database exploration and data modeling.
-- SQL joins, aggregations, conditional logic, and analytical queries.
-- Cloud data analysis using Google BigQuery.
-- DAX measures and KPI development.
-- Power BI dashboard design and date filtering.
-- Business problem formulation and risk analysis.
-- Communicating findings with appropriate limitations.
+Claims utilisation and average approved claim amounts varied across occupational groups.
 
+The findings highlighted differences in historical claims experience, although these differences do not establish that occupation causes higher claims expenditure.
 
-- Next Steps:
-Develop a custom Risk Score model: Define transparent risk indicators and scoring rules, then evaluate whether the resulting scores meaningfully distinguish different levels of claim utilization and financial exposure.
+### 5. Salary and Grade-Level Analysis
 
-Prepare an executive report: Summarize the main findings, business implications, data limitations, and recommendations for insurance management.
+Employees were compared across salary bands and grade levels.
 
-Update the Published portfolio project: Re-organize the SQL scripts, data-cleaning notebook, database relationship diagram, dashboard screenshots, and documentation in a GitHub repository.
+The results showed some differences in historical claims expenditure, but no sufficiently established basis for automatically assigning individual exposure penalties based on salary or grade.
 
-Prepare a project presentation: Develop a concise walkthrough explaining the business problem, analytical approach, key findings, and lessons learned.
+### 6. Claims Frequency Analysis
 
-Conclusion
+Employee claims frequency was examined to understand how repeated claims activity related to approved claims and financial exposure.
 
-This project demonstrates how insurance data can be transformed into business insights through a structured analytics workflow.
+The analysis showed that employees with higher submitted claims frequency generally had higher average approved claim amounts.
 
-By combining Python, SQL, BigQuery, and Power BI, the project investigates healthcare utilization, claim frequency, and corporate financial exposure while highlighting the importance of data quality and sound interpretation.
+However, claims severity did not increase consistently with frequency.
 
-The longer-term objective is to build on these findings to develop a transparent risk assessment framework that can support insurance analysis and decision-making.
+### 7. Claims Status Analysis
 
+The claims dataset contained three main statuses:
 
-Project type: Data Analytics / Business Intelligence
+| Status | Number of claims | Percentage |
+|---|---:|---:|
+| Approved | 1,736 | 69.44% |
+| Pending | 508 | 20.32% |
+| Rejected | 256 | 10.24% |
+| **Total** | **2,500** | **100%** |
 
-Author: Irene Ampiaw
+The analysis also investigated approval and rejection patterns across submitted claims frequency categories.
+
+No strong evidence was found that employees submitting more claims consistently experienced higher rejection rates.
+
+---
+
+## Historical Claims Exposure Scoring Framework
+
+One of the major deliverables was developing an employee-level historical claims exposure classification framework.
+
+The objective was to combine two dimensions:
+
+1. **Submitted Claim Frequency:** Measures how frequently an employee submitted claims.
+2. **Approved Claim Cost Exposure:** Measures the total historical financial amount of approved claims associated with an employee.
+
+### Step 1: Claim Frequency Classification
+
+Employees were classified according to their total submitted claims.
+
+| Category | Number of submitted claims |
+|---|---:|
+| No Claims | 0 |
+| Low | 1 |
+| Moderate | 2 |
+| High | 3 |
+| Very High | 4 or more |
+
+### Step 2: Cost Exposure Classification
+
+Percentiles were calculated among employees with positive approved claim amounts.
+
+The resulting thresholds were:
+
+| Category | Total approved claim amount |
+|---|---:|
+| No Approved Claims | GHS 0 |
+| Lower Exposure | GHS 1–12,619 |
+| Moderate Exposure | Above GHS 12,619–27,021 |
+| High Exposure | Above GHS 27,021–58,107 |
+| Very High Exposure | Above GHS 58,107 |
+
+### Step 3: Scoring Points
+
+Each category was assigned points on a scale of 0–100.
+
+**Claim Frequency Points**
+
+| Category | Points |
+|---|---:|
+| No Claims | 0 |
+| Low | 25 |
+| Moderate | 50 |
+| High | 75 |
+| Very High | 100 |
+
+**Cost Exposure Points**
+
+| Category | Points |
+|---|---:|
+| No Approved Claims | 0 |
+| Lower Exposure | 25 |
+| Moderate Exposure | 50 |
+| High Exposure | 75 |
+| Very High Exposure | 100 |
+
+### Step 4: Weighted Historical Exposure Score
+
+The model assigned:
+
+- 60% weight to approved claim cost exposure.
+- 40% weight to submitted claim frequency.
+
+The scoring formula was:
+
+`Historical Exposure Score = (Cost Exposure Points × 0.60) + (Frequency Points × 0.40)`
+
+These weights were selected as initial modelling assumptions based on the project's focus on historical financial exposure. They were not statistically learned or independently validated.
+
+### Step 5: Final Classification
+
+| Score | Classification |
+|---|---|
+| 0–19 | Very Low |
+| 20–39 | Low |
+| 40–59 | Moderate |
+| 60–79 | High |
+| 80–100 | Very High |
+
+### Scoring Results
+
+The framework classified all 1,974 employees.
+
+| Classification | Employees | Percentage |
+|---|---:|---:|
+| Very Low | 773 | 39.16% |
+| Low | 322 | 16.31% |
+| Moderate | 364 | 18.44% |
+| High | 268 | 13.58% |
+| Very High | 247 | 12.51% |
+| **Total** | **1,974** | **100%** |
+
+---
+
+## Key Business Insights
+
+### 1. Concentration of Approved Claims Expenditure
+
+The 247 employees classified as Very High exposure accounted for GHS 24,080,576 in approved claims expenditure.
+
+This represented approximately 50.96% of the total approved claims amount.
+
+This finding highlights the concentration of historical claims expenditure within a relatively small employee group.
+
+### 2. Differences in Historical Claims Utilisation
+
+Average approved claims per employee increased across the exposure categories:
+
+| Classification | Average approved claims |
+|---|---:|
+| Very Low | 0.00 |
+| Low | 0.86 |
+| Moderate | 1.15 |
+| High | 1.69 |
+| Very High | 2.38 |
+
+### 3. Higher Historical Financial Exposure
+
+Average approved claim amounts per employee increased across the categories:
+
+| Classification | Average approved claim amount |
+|---|---:|
+| Very Low | GHS 0 |
+| Low | GHS 5,915.24 |
+| Moderate | GHS 23,430.91 |
+| High | GHS 47,514.57 |
+| Very High | GHS 97,492.21 |
+
+### 4. Frequency and Cost Exposure Provide Different Insights
+
+Some employees submitted multiple claims without having approved claims, while others had very high approved claim amounts despite submitting relatively few claims.
+
+This reinforced the importance of considering claim frequency and approved claim cost as separate dimensions.
+
+---
+
+## Power BI Dashboard Development
+
+Four analytical dashboard areas were developed, with a dedicated historical exposure dashboard added to the project.
+
+### 1. Executive Overview
+
+Provides a high-level summary of insurance performance using key performance indicators and management visuals.
+
+### 2. Employee Risk and Utilisation
+
+Explores employee characteristics and historical claims utilisation across demographic and employment groups.
+
+### 3. Claims Analysis and Trends
+
+Examines claims volumes, statuses, approved claim amounts and historical claims trends.
+
+### 4. Regional Performance Analysis
+
+Provides insights into claims performance across regions and companies.
+
+### 5. Historical Claims Exposure
+
+Visualises:
+
+- Employee distribution by exposure classification.
+- Total approved claims amount by exposure classification.
+- Average historical exposure score by classification.
+- Average approved claims per employee.
+- Employee distribution by claim frequency and cost exposure.
+
+---
+
+## Limitations and Future Improvements
+
+This project provides a historical view of claims behaviour and financial exposure. Several improvements would strengthen the framework.
+
+### Limitations
+
+- The scoring weights are initial assumptions rather than statistically optimised parameters.
+- The framework uses historical claims information and does not predict future medical claims.
+- Claims and premium records cover different periods, limiting direct financial comparisons.
+- Some employee categories contain relatively small populations.
+- The analysis does not establish causal relationships between employee characteristics and claims expenditure.
+
+### Future Improvements
+
+- Conduct sensitivity analysis to examine how alternative scoring weights affect employee classifications.
+- Test the scoring framework against a separate future claims period to evaluate predictive performance.
+- Develop more detailed claims severity and frequency analysis.
+- Investigate regional and company-level drivers of claims expenditure.
+- Improve premium and claims period alignment for more meaningful financial performance analysis.
+- Introduce automated data refresh and reporting pipelines.
+- Explore statistical models for forecasting claims expenditure, subject to appropriate validation and responsible use.
+
+---
+
+## Conclusion
+
+This project demonstrates how SQL, cloud data warehousing and business intelligence tools can be combined to solve a practical insurance analytics problem.
+
+By transforming multiple datasets into reusable analytical tables, investigating historical claims behaviour and developing an employee-level historical exposure classification framework, I created a reporting solution that helps management understand claims utilisation and the concentration of historical financial exposure.
+
+The project strengthened my practical experience in SQL, BigQuery, data transformation, exploratory data analysis, analytical modelling and Power BI dashboard development.
+
+---
+
+## Irene Ampiaw
+
+**Data Analyst Portfolio Project**
+
+**Tools:** SQL | Google BigQuery | Power BI | Excel | Python
+
